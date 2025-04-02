@@ -429,12 +429,11 @@ ${filename}: ${summary}
     if (releaseNotesResponse === '') {
       info('release notes: nothing obtained from bedrock')
     } else {
-      let message = '### Summary (generated)\n\n'
-      message += releaseNotesResponse
+      // Simply add the release notes directly without the "Summary (generated)" header
       try {
         await commenter.updateDescription(
           context.payload.pull_request.number,
-          message
+          releaseNotesResponse
         )
       } catch (e: any) {
         warning(`release notes: error from github: ${e.message as string}`)
@@ -712,7 +711,7 @@ ${
 - Invite the bot into a review comment chain by tagging \`/reviewbot\` in a reply.
 
 ### Code suggestions
-- The bot may make code suggestions, but please review them carefully before committing since the line number ranges may be misaligned. 
+- The bot may make code suggestions, but please review them carefully before committing since the line number ranges may be misaligned.
 - You can edit the comment made by the bot and manually tweak the suggestion if it is slightly off.
 
 ### Pausing incremental reviews

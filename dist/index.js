@@ -2483,14 +2483,11 @@ ${tag}`;
         return releaseNotes.replace(/(^|\n)> .*/g, '');
     }
     async updateDescription(pullNumber, message) {
-        // add this response to the description field of the PR as release notes by looking
-        // for the tag (marker)
         try {
             // get latest description from PR
             const pr = await _octokit__WEBPACK_IMPORTED_MODULE_2__/* .octokit.pulls.get */ .K.pulls.get({
                 owner: repo.owner,
                 repo: repo.repo,
-                // eslint-disable-next-line camelcase
                 pull_number: pullNumber
             });
             let body = '';
@@ -2498,12 +2495,11 @@ ${tag}`;
                 body = pr.data.body;
             }
             const description = this.getDescription(body);
-            const messageClean = this.removeContentWithinTags(message, DESCRIPTION_START_TAG, DESCRIPTION_END_TAG);
-            const newDescription = `${description}\n${DESCRIPTION_START_TAG}\n${messageClean}\n${DESCRIPTION_END_TAG}`;
+            // Instead of adding tags, just append the message
+            const newDescription = `${description}\n${message}`;
             await _octokit__WEBPACK_IMPORTED_MODULE_2__/* .octokit.pulls.update */ .K.pulls.update({
                 owner: repo.owner,
                 repo: repo.repo,
-                // eslint-disable-next-line camelcase
                 pull_number: pullNumber,
                 body: newDescription
             });
@@ -6089,10 +6085,9 @@ ${filename}: ${summary}
             (0,core.info)('release notes: nothing obtained from bedrock');
         }
         else {
-            let message = '### Summary (generated)\n\n';
-            message += releaseNotesResponse;
+            // Simply add the release notes directly without the "Summary (generated)" header
             try {
-                await commenter.updateDescription(context.payload.pull_request.number, message);
+                await commenter.updateDescription(context.payload.pull_request.number, releaseNotesResponse);
             }
             catch (e) {
                 (0,core.warning)(`release notes: error from github: ${e.message}`);
@@ -6300,7 +6295,7 @@ ${reviewsSkipped.length > 0
 - Invite the bot into a review comment chain by tagging \`/reviewbot\` in a reply.
 
 ### Code suggestions
-- The bot may make code suggestions, but please review them carefully before committing since the line number ranges may be misaligned. 
+- The bot may make code suggestions, but please review them carefully before committing since the line number ranges may be misaligned.
 - You can edit the comment made by the bot and manually tweak the suggestion if it is slightly off.
 
 ### Pausing incremental reviews
